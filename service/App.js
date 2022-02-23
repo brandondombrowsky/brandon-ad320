@@ -9,7 +9,8 @@ const app = express()
 const port = 8000
 
 // CONNECT TO MongoDB  
-const connectionString = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@brandocluster.looea.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
+const connectionString = 
+    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@brandocluster.looea.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
 try {
     await mongoose.connect(connectionString)
 } catch (err) {
@@ -27,7 +28,7 @@ app.use(express.json())
 app.use(exampleMiddleware)
 
 // ROUTES
-// get - all cards for a deck (still needs pagination)
+// get - all cards for a deck
 app.get('/decks/:id/cards', async (req, res) => {
     const limit = req.query.limit
     const deck = await Deck.findById(req.params.id)
@@ -41,31 +42,52 @@ app.get('/decks/:id/cards', async (req, res) => {
 // get - an individual card by ID
 const cardsById = async (req, res) => {
     const card = await Deck.findOne({
-        'cards._id': req.params.id
+      'cards._id': req.params.id
     })
-    res.status(200).send(card)
-}
+    const oneCard = card.cards.id(req.params.id)
+          res.status(200);
+          res.send(oneCard)
+  }
+  
+  app.get('/cards/:id', cardsById)
 
-app.get('/cards/:id', cardsById)
+// get - a deck by Id
+app.get('/decks/:id', async (req, res) => {
+    const deck = await Deck.findById(req.params.id)
+    if(deck) {
+        res.status(200).send(deck)
+    } else {
+        res.sendStatus(404)
+    }
+}) 
 
-// get - a deck by ID
-const deckById = (req, res) => {
-
-}
-
-app.get('/deck/:id', deckById) 
-
-// get - a deck by User
-const deckByUser = (req, res) => {
-
-}
-
-app.get('deck/user')
+// get - a deck by User 
+app.get('/user/:id', async (req, res) => {
+    const user = await User.findById(req.params.id)
+    if (user) {
+        res.status(200).send(user)
+    } else {
+        res.sendStatus(404)
+    }
+}) 
 
 // POST 
 // post - create a deck
-app.post('/deck', (req, res) => {
-
+app.post('/deck', async (req, res) => {
+    console.log('request body ', req)
+    if (!req.body) {
+        res.status(500)
+    } else {
+        const deck = req.body
+        try {
+            const response = await Deck.create(deck)
+            res.status(200)
+            res.send(response)
+        } catch (error) {
+            console.log(error)
+            res.status(400)
+        }
+    }
 })
 
 // post - create a card
@@ -74,7 +96,7 @@ app.post('/cards', async (req, res) => {
     console.log('request body ', cardRequest)
     if (cardRequest.deckId) {
         try {
-            const deck = await Deck.findById(cardRequest.deckId)
+            const deck = await Deck.create(cardRequest.deckId)
             if (deck) {
                 deck.cards.push({
                     frontImage: cardRequest.frontImage,
@@ -96,42 +118,125 @@ app.post('/cards', async (req, res) => {
 })
 
 // post - create a user
-app.post('/user', (req, res) => {
-
-}) 
+app.post('/createUser', async (req, res) => {
+    console.log('request body ', req.body)
+    if(!req.body) {
+        res.status(500)
+    } else {
+        const user = req.body 
+        try {
+           const response = await User.create(user) 
+           res.status(200)
+           res.send(response)
+        } catch (error) {
+            res.sendStatus(400)
+            res.send(error)
+        }
+    }
+})
 
 // PUTS
 // put - card update
-app.put('/cards', (req, res) => {
-
+app.put('/cards/:deck_id/:card_id', async (req, res) => {
+    console.log(req.body)
+    const deck = await Deck.findById(req.params.deck_id)
+    if (deck !== null) {
+        const matchingCardArray = deck.cards.filter((card) => {
+            return card._id.toString() ===  req.params.card_id
+        })
+        const matchingCard = matchingCardArray[0]
+        matchingCard.frontImage = req.body.frontImage,
+        matchingCard.frontText = req.body.frontText,
+        matchingCard.backImage = req.body.backImage,
+        matchingCard.backText = req.body.backText
+        for(var i= 0; i < deck.cards.length; i++) {
+            if (deck.cards[i]._id.toString() === matchingCard._id) {
+                deck.cards[i] = matchingCard
+            }
+        }
+        await deck.save()
+        const updatedDeck = await Deck.findById(req.params.deck_id)
+        res.send(updatedDeck)
+    } else {
+        res.send("deck does not exist with id")
+    }
 })
 
 // put - deck update
-app.put('/deck', (req, res) => {
-
+app.put('/decks/:deck_id', async (req, res) => {
+    console.log('request body ', req.body)
+    if (!req.body) {
+        res.status(500)
+    } else {
+        const deck = req.body
+        try {
+            const response = await Deck.updateOne(deck)
+            res.status(200)
+            res.send(response)
+        } catch {
+            res.sendStatus(400)
+            res.send(error)
+        }
+    }
 })
 
 // put - user update
-app.put('/user', (req, res) => {
-
+app.put('/user/:id', async (req, res) => {
+    console.log('request body ', req.body)
+    if (!req.body) {
+        res.status(500)
+    } else {
+        const user = req.body
+        try {
+            const response = await User.updateOne(user)
+            res.status(200)
+            res.send(response)
+        } catch {
+            res.sendStatus(400)
+            res.send(error)
+        }
+    }
 })
 
 // DELETE
-// delete - card from deck
-app.delete('/cards', (req, res) => {
+// delete - a card
+app.delete('/cards/:deck_id/:card_id', async (req, res) => {
+    const deck = await Deck.findById(req.params.deck_id)
+    if (deck !== null) {
+        const newCardsArray = deck.cards.filter((card) => {
+            return card._id.toString() !==  req.params.card_id
+        })
+        deck.cards = newCardsArray
+        deck.size = newCardsArray.length
+        await deck.save()
+        const updatedDeck = await Deck.findById(req.params.deck_id)
+        res.send(updatedDeck)
+    } else {
+        res.send("deck does not exist with id")
+    }
+  })
 
-})
 
 // delete - a deck
-app.delete('/deck', (req, res) => {
-
-})
+app.delete('/decks/:id', async (req, res) => {
+    const deck = await Deck.deleteOne({_id:req.params.id})
+    if (deck) {
+        res.status(200).send(deck)
+    } else {
+        res.sendStatus(400)
+    }
+}) 
 
 // delete - a user
-app.delete('/user', (req, res) => {
-    
-})
+app.delete('/user/:id', async (req, res) => {
+    const user = await User.deleteOne({_id:req.params.id})
+    if (user) {
+        res.status(200).send(user)
+    } else {
+        res.sendStatus(400)
+    }
+}) 
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}!`)
-  })
+})

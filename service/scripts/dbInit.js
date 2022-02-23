@@ -12,7 +12,7 @@ const sleepAndQuit = new Promise((resolve) => {
 })
 
 const initDB = async () => {
-  const connectionString = 'mongodb+srv://bas_ad320:password5529@brandocluster.looea.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+  const connectionString = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@brandocluster.looea.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
   try {
     await mongoose.connect(connectionString)
   } catch (err) {

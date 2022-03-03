@@ -1,32 +1,30 @@
-import React from 'react';
-import './App.css';
+import React, { useEffect, useState } from 'react'
+import Container from '@mui/material/Container'
+import './App.css'
 import Topbar from './components/Topbar/Topbar'
-import CardNav from './components/CardNav/CardNav';
-import Flashcard from './components/Flashcard/Flashcard';
-import Button from './components/Button/Button';
-
-
-const controls = ['Back', 'Flip', 'Next']
+import DeckProvider from './components/Deck/DeckProvider'
+import axios from 'axios'
 
 function App() {
+  const [createMode, setCreateMode] = useState(false)
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    axios.get('http://localhost:8000/users').then((response) => {
+      console.log(`response from users ${response.data[0].firstName}`)
+      setUser(response.data[0])
+    })
+  }, [])
+
   return (
     <React.Fragment>
-      <Topbar />
-      <div className='container'>
-        <CardNav />
-        <div className='card-container'>
-        <Flashcard />
-          <div className='card-controls'>
-            {controls.map((control) => {
-              return <Button className='button'>{control}</Button>
-            })}
-          </div>
-        </div>
-      </div>
+      <Topbar createMode={createMode} createCardHandler={() => { setCreateMode(!createMode) }} />
+      <Container width="lg">
+        {user === null ? <span>Loading...</span> :
+          <DeckProvider userId={user._id} decks={user.decks} createMode={createMode} /> }
+      </Container>
     </React.Fragment>
-  );
+  )
 }
-
-// this is a random change so I can check changes at Github
 
 export default App;

@@ -52,17 +52,11 @@ app.delete('/decks/:id', deleteDeck)
 
 app.post(
   '/decks/:id/cards',
-  body('frontImage').isURL(),
+  body('frontImage').exists({ checkFalsy: true }),
   body('frontText').exists({ checkFalsy: true }),
   body('backImage').exists({ checkFalsy: true }),
   body('backText').exists({ checkFalsy: true }),
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    res.sendStatus(201)
-  },
+
   createCard
 )
 

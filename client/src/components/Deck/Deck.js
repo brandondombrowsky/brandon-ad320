@@ -55,8 +55,6 @@ const Deck = ({ deck }) => {
 
               let cardContent;
 
-              // && () && () && ()
-
               if ( (card.frontImage !== "" && card.frontImage !== undefined) &&
                    (card.frontText !== "" && card.frontText !== undefined) &&
                    (card.backImage !== "" && card.backImage !== undefined) &&

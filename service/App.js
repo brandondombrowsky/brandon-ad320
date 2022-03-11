@@ -1,20 +1,10 @@
 import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
-import { body, validationResult } from 'express-validator'
 
-import {
-  deckById,
-  getDecks,
-  createDeck,
-  createCard,
-  deleteDeck,
-  updateDeck
-} from './handlers/decks.js'
-
-import {
-  getUsers
-} from './handlers/users.js'
+import decksRouter from './routers/decks.js'
+import usersRouter from './routers/users.js'
+import authRouter, { verifyToken } from './routers/auth.js'
 
 const app = express()
 const port = 8000
@@ -35,37 +25,9 @@ app.use(express.json())
 
 // Routes
 
-const notImplemented = (req, res) => {
-  res.status(503).send(`Route not defined for ${req.url}`)
-}
-
-// Deck Routes
-app.get('/decks', getDecks)
-app.get('/decks/:id', deckById)
-app.post('/decks', body('name').not().isEmpty(), createDeck)
-app.put(
-  '/decks/:id',
-  body('name').not().isEmpty(),
-  updateDeck
-)
-app.delete('/decks/:id', deleteDeck)
-
-app.post(
-  '/decks/:id/cards',
-  body('frontImage').exists({ checkFalsy: true }),
-  body('frontText').exists({ checkFalsy: true }),
-  body('backImage').exists({ checkFalsy: true }),
-  body('backText').exists({ checkFalsy: true }),
-
-  createCard
-)
-
-// User Routes
-app.get('/users', getUsers)
-app.get('/users/:id', notImplemented)
-app.post('/users', notImplemented)
-app.put('/users/:id', notImplemented)
-app.delete('/users/:id', notImplemented)
+app.use('/auth', authRouter)
+app.use('/decks', verifyToken, decksRouter)
+app.use('/users', verifyToken, usersRouter)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`)

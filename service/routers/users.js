@@ -57,13 +57,13 @@ const deleteUser = async (req, res) => {
   const requestor = await User.findById(userId)
   const user = await User.findById(req.params.id)
   if (requestor.role === 'admin') {
-    const result = await User.findByIdAndDelete(req.params.id)
+    const result = await User.findByIdAndDelete(user)
     res.status(201).send(`User deleted ${result}`)
-  } else if (requestor.role === 'superuser' && user === userId) {
-    const result = await User.findByIdAndDeleste(req.params.id)
+  } else if (requestor.role === 'superuser' || user === userId) {
+    const result = await User.findByIdAndDelete(user)
     res.status(201).send(`User deleted ${result}`)
   } else if (requestor.role === 'user' && req.params.id === userId) {
-    const result = await User.findByIdAndUpdate(req.params.id, { active: false })
+    const result = await User.findByIdAndUpdate(user, { active: false })
     res.status(201).send(`User deactivated ${result}`)
   } else {
     res.status(403).send('Forbidden')

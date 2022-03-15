@@ -27,13 +27,15 @@ const getUsers = async (req, res) => {
   }
 }
 
-const getUsersById = async (req, res) => {
+const getUsersById = async (req, res) => {  
   const { userId } = req.user   
   const requestor = await User.findById(userId)  
-  if (requestor.role === 'admin' || requestor.role === 'superuser') {
+  if (requestor.role === 'admin' || 
+  requestor.role === 'superuser' ||
+  (requestor.role === 'user' && requestor._id.toString() === req.params.id.toString())) { 
     const user = await User.findById(req.params.id)
     res.send(user) 
-  } else {
+  } else { 
     res.status(403).send('Forbidden')
   }
 }
@@ -41,13 +43,11 @@ const getUsersById = async (req, res) => {
 const updateUser = async (req, res) => {
   const { userId } = req.user 
   const requestor = await User.findById(userId)
-  if (requestor.role === 'admin') {
-    const result = await User.findByIdAndUpdate(req.params.id, req.body)
-    res.status(201).send(`User updated ${result}`)
-  } else if (requestor.role === 'superuser' || req.params.id === userId) {
-    const result = await User.findByIdAndUpdate(req.params.id, req.body)
-    res.status(201).send(`User updated ${result}`)
-  } else {
+  const result = await User.findByIdAndUpdate(req.params.id, req.body)
+  const status = res.status(201).send(`User updated ${result}`) 
+  if (requestor.role === 'admin' || requestor.role === 'superuser') {
+    return status
+  } else {  
     res.sendStatus(403).send('Forbidden')
   }
 }
@@ -56,12 +56,9 @@ const deleteUser = async (req, res) => {
   const { userId } = req.user 
   const requestor = await User.findById(userId)
   const user = await User.findById(req.params.id)
-  if (requestor.role === 'admin') {
+  if (requestor.role === 'admin' || (requestor.role === 'superuser' && requestor._id === user._id )) {
     const result = await User.findByIdAndDelete(user)
-    res.status(201).send(`User deleted ${result}`)
-  } else if (requestor.role === 'superuser' || user === userId) {
-    const result = await User.findByIdAndDelete(user)
-    res.status(201).send(`User deleted ${result}`)
+    res.status(201).send(`User deleted ${result}`) 
   } else if (requestor.role === 'user' && req.params.id === userId) {
     const result = await User.findByIdAndUpdate(user, { active: false })
     res.status(201).send(`User deactivated ${result}`)

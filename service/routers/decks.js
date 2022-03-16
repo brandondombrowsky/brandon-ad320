@@ -66,7 +66,7 @@ const deleteDeck = async (req, res) => {
   const userId = ''
   const deckId = req.params.id
   try {
-    const user = await User.findById(req.params.id)
+    const user = await User.find({ "decks._id": req.params.id })
     const requestor = await User.findById(userId)
     if (requestor.role === 'admin' || (requestor.role === 'superuser' && requestor._id === user._id ) || 
         (requestor.role === 'user' && requestor._id === user._id)) { 
@@ -88,7 +88,7 @@ const updateDeck = async (req, res) => {
   const deckId = req.params.id
   const newDeck = req.body
   try {
-    const user = await User.findById(req.params.id)
+    const user = await User.find({ "decks._id": req.params.id })
     const requestor = await User.findById(userId)
     if (requestor.role === 'admin' || (requestor.role === 'superuser' && requestor._id === user._id ) || 
         (requestor.role === 'user' && requestor._id === user._id)) { 

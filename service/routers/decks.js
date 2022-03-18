@@ -21,7 +21,7 @@ const getDecks = async (req, res) => {
 }
 
 const createDeck = async (req, res) => {
-  const userId = ''
+  const userId = req.user.userId
   const newDeck = req.body
   try {
     const user = await User.findById(userId)
@@ -38,7 +38,7 @@ const createDeck = async (req, res) => {
 }
 
 const createCard = async (req, res) => {
-  const userId = ''
+  const userId = req.user.userId
   const deckId = req.params.id
   const newCard = req.body
   try {
@@ -55,7 +55,7 @@ const createCard = async (req, res) => {
 }
 
 const deleteDeck = async (req, res) => {
-  const userId = ''
+  const userId = req.user.userId
   const deckId = req.params.id
   try {
     const user = await User.findById(userId)
@@ -70,7 +70,7 @@ const deleteDeck = async (req, res) => {
 }
 
 const updateDeck = async (req, res) => {
-  const userId = ''
+  const userId = req.user.userId
   const deckId = req.params.id
   const newDeck = req.body
   try {

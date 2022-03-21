@@ -1,15 +1,30 @@
 import React from 'react'
 import { Button, Box, TextField, Typography } from '@mui/material'
+import { useAuth } from '../Auth/AuthProvider'
+import { Navigate, useNavigate, useLocation } from 'react-router-dom'
 
 const Register = () => {
-  // Assignment: use the useAuth hook here to handle registering a new user
+  const { auth, register } = useAuth()
+  const navigate = useNavigate()
+  let location = useLocation()
+
+  const source = location.state?.from?.pathname || "/login"
+  const msg = location.state?.msg || null  
+
   const handleSubmit = (event) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
+    register(data.get('email'), data.get('password'), () => {
+      navigate(source, { replace: true })
+    }) 
     console.log({
       email: data.get('email'),
       password: data.get('password'),
-    })
+    }) 
+  }
+
+  if (auth) {
+    return <Navigate to={source} />
   }
 
   return (
@@ -53,6 +68,7 @@ const Register = () => {
         >
           Sign In
         </Button>
+        <p>{msg}</p> 
       </Box>
     </Box>
   )

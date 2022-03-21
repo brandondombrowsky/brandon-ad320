@@ -11,12 +11,10 @@ const register = async (req, res) => {
   try {
     const existingUser = await User.findOne({ email: req.body.email.toLowerCase() })
     if (existingUser) {
+
       res.status(400).send('That email is already registered')
     } else {
       const newUser = req.body
-      // We create an encrypted string that represents the password but
-      // is not the same as the password. This may only be decoded
-      // here with these tools
       newUser.password = await bcrypt.hash(req.body.password, 10)
       const savedUser = await User.create(newUser)
       res.status(200).send(savedUser._id)
@@ -40,15 +38,16 @@ async function login(req, res) {
       if (!passwordComparison) {
         res.status(401).send('Username or password are invalid')
       } else {
-        const payload = {
+        const payload = {  
           user: existingUser._id,
           role: existingUser.role
         }
         const token = await jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: 86400 })
         res.status(200).send({
           expiresIn: 86400,
-          token: token
-        })
+          token: token, 
+          user: existingUser
+        }) 
       }
     }
   } catch (err) {

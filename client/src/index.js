@@ -11,6 +11,7 @@ import Register from './components/Register/Register'
 import Protected from './components/Auth/Protected'
 import CreateFlashcard from './components/Flashcard/CreateFlashcard'
 import AuthProvider from './components/Auth/AuthProvider'
+import User from './components/User/User'  
 
 
 ReactDOM.render(
@@ -20,11 +21,11 @@ ReactDOM.render(
         <Topbar />
         <Routes>
           <Route path="/" element={<Welcome />} />
-          {/* Addignment: Add a route for /user to redirect to from Login */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/app" element={<Protected><App /></Protected>} />
           <Route path="/create" element={<Protected><CreateFlashcard /></Protected>} />
+          <Route path="/user" element={<Protected><User /></Protected>} /> 
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -13,7 +13,6 @@ import CreateFlashcard from './components/Flashcard/CreateFlashcard'
 import AuthProvider from './components/Auth/AuthProvider'
 import User from './components/User/User'  
 
-
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>

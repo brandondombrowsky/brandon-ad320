@@ -28,10 +28,7 @@ const Login = (props) => {
         } 
       })
     })
-
   }
-
-
 
   return (
     <Box

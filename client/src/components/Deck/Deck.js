@@ -31,8 +31,6 @@ const Deck = ({ deck }) => {
     }
   }
 
-  console.log("[Flashcard Provider] length of cards ", deck.cards.length)
-
   if (deck.cards.length < 1) {
     return <span>Add a card!</span>
   } else if (index >= deck.cards.length) {
@@ -52,14 +50,8 @@ const Deck = ({ deck }) => {
             subheader={<ListSubheader>Cards</ListSubheader>}
           >
             {deck.cards.map((card, idx) => {
-
-              let cardContent;
-
-              if ( (card.frontImage !== "" && card.frontImage !== undefined) &&
-                   (card.frontText !== "" && card.frontText !== undefined) &&
-                   (card.backImage !== "" && card.backImage !== undefined) &&
-                   (card.backText !== "" && card.backText !== undefined) ) {
-                cardContent = <ListItemButton
+              return (
+                <ListItemButton
                   key={idx}
                   selected={idx === index}
                   onClick={() => {
@@ -68,9 +60,7 @@ const Deck = ({ deck }) => {
                 >
                   <ListItemText primary={`${card.frontText.slice(0, 15)}...`} />
                 </ListItemButton>
-              }
-
-              return cardContent
+              )
             })}
           </List>
         </Paper>
